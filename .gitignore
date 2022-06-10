@@ -1,0 +1,4 @@
+venv
+*.dbc
+*.__pycache__
+*.pyc
