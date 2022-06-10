@@ -17,6 +17,9 @@
 
     5. Log those messages in the console
 
-    6. Monitor for timeouts -> Could mean crashes
+    6. Monitor for timeouts
+        -> Could mean crashes
+
+    7. Connect GUI from old codebase to the fuzzer
 """
 

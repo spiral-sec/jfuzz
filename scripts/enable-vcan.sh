@@ -18,3 +18,7 @@ sudo ip link set vcan0 mtu 72
 # Bring the virtual CAN interface online.
 ip link set up vcan0
 
+
+# Bring up real CAN interface.
+sudo ip link set can0 up type can bitrate 1000000
+
