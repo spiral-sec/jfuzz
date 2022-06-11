@@ -13,7 +13,7 @@ import can
     on Linux for development purposes.
 """
 
-class BUS(can.interface.Bus):
+class BUS:
     def __init__(self) -> None:
 
         """
@@ -27,7 +27,7 @@ class BUS(can.interface.Bus):
         channel = 'vcan0' if development_mode_enabled else 0
         name = 'jfuzz' if development_mode_enabled else 'CANalyzer'
 
-        super(self, BUS).__init__(
+        self.interface = can.interface.Bus(
             name=name,
             bustype=bustype,
             channel=channel,

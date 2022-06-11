@@ -1,20 +1,16 @@
 # -*- coding: UTF-8 -*-
+import can
+
 from jfuzz.core.database import Database
-from jfuzz.core.interface import BUS
+from jfuzz.core.bus import BUS
+from jfuzz.core.fuzzer import Fuzzer
 
 
 def main() -> None:
-
-    filepath = './file.dbc'
-
     bus = BUS()
-    database = Database(filepath)
+    dbc = Database('.')
+    Fuzzer().run(bus, dbc.database, 10)
 
-    print(f'Parsing {filepath}\n')
-    print(database.messages)
-
-    for m in database.messages:
-        bus.send_one(m)
 
 
 if __name__ == '__main__':
