@@ -54,7 +54,7 @@ enable () {
 while getopts "m:ish" o; do
     case "${o}" in
         m)
-            install && monitor ${OPTARG}
+            install && enable 2>/dev/null && monitor ${OPTARG}
             ;;
         i)
             install && enable 2>/dev/null
