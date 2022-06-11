@@ -3,23 +3,19 @@
 
 """
     TODO:
-    1. Connect to Bus interface (
-            in testing mode -> vcan
-            otherwise -> Vector
-        )
+    - Parse .dbc file
+        -> Collect messages
 
-    2. Parse .dbc file
-        -> Collect signals, messages and nodes
+    - Generate random messages using the fetched messages we got
 
-    3. Generate random messages using the fetched messages we got
+    - send to Bus interface with generated messages
+        -> should be as asynchronous as possible and handle logging
 
-    4. Shell Bus interface with generated messages
+    - Log those messages in the console
 
-    5. Log those messages in the console
-
-    6. Monitor for timeouts
+    - Monitor for timeouts
         -> Could mean crashes
 
-    7. Connect GUI from old codebase to the fuzzer
+    - Connect GUI from old codebase to the fuzzer
 """
 

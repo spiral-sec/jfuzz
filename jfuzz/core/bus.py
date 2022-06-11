@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 import os
+
 import can
 
 """
@@ -12,7 +13,7 @@ import can
     on Linux for development purposes.
 """
 
-class BUS(object):
+class BUS(can.interface.Bus):
     def __init__(self) -> None:
 
         """
@@ -26,35 +27,9 @@ class BUS(object):
         channel = 'vcan0' if development_mode_enabled else 0
         name = 'jfuzz' if development_mode_enabled else 'CANalyzer'
 
-        self.__internal = can.interface.Bus(
+        super(self, BUS).__init__(
             name=name,
             bustype=bustype,
             channel=channel,
-            preserve_timestamps=True,
-            bitrate=1000000
+            bitrate=10000
         )
-
-
-    """
-        Sends one CAN message.
-
-        Prefer send_many() for fuzzing.
-    """
-    def send_one(self, message: can.Message) -> None:
-        try:
-            self.__internal.send(message)
-        except can.CanError:
-            print(f'Error: could not send {message}')
-
-
-    """
-        Sends a range of generated messages.
-    """
-    def send_many(self, messages: [can.Message]) -> None:
-        try:
-            for message in messages:
-                self.__internal.send(message)
-
-        except:
-            print('Unexpected exception')
-
