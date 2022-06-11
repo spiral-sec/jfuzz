@@ -10,7 +10,7 @@ help () {
   echo ""
   echo "helper script to manage vcan for CAN-related development"
   echo ""
-  printf "\t-i\t\tinstalls all the necessary packages for the tool's usage. Runs automagically on first monitor run\n"
+  printf "\t-i\t\tinstalls all the necessary packages for the tool's usage.\n"
   printf "\t-s\t\tdisables vcan (you can use ip link to check if vcan0 is activated)\n"
   printf "\t-m file.dbc\tmonitors vcan0 and translates every message using provided .dbc file\n"
 }
@@ -54,7 +54,7 @@ enable () {
 while getopts "m:ish" o; do
     case "${o}" in
         m)
-            install && enable 2>/dev/null && monitor ${OPTARG}
+            monitor ${OPTARG}
             ;;
         i)
             install && enable 2>/dev/null

@@ -3,7 +3,6 @@
 import os
 from os import walk
 
-import can
 import cantools
 from cantools.database import load_file
 
