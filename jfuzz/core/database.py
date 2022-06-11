@@ -4,6 +4,7 @@ import os
 from os import walk
 
 import can
+import cantools
 from cantools.database import load_file
 
 """
@@ -14,12 +15,12 @@ from cantools.database import load_file
 class Database:
     def __init__(self, project_dir_path: str) -> None:
         self.files: [str] = []
-        self.messages : [can.Message] = []
-        self.nodes : [str] = []
+        self.messages = []
+        self.database: cantools.database.Database = cantools.database.Database()
 
         self.collect_dbc_files(project_dir_path)
         for file in self.files:
-            self.parse(file)
+            self.database.add_dbc_file(file, encoding='cp1252')
 
     def collect_dbc_files(self, dir_path) -> None:
         sep = '/' if os.environ.get('DEV', False) else '\\'
@@ -30,18 +31,3 @@ class Database:
                     new_file = root + sep + file
                     self.files.append(new_file)
         return None
-
-
-    def parse(self, filepath: str) -> None:
-
-        """
-        :param filepath: path of .dbc file
-        :return: Nothing
-        """
-
-        if cantools_db := load_file(filepath):
-            for node in cantools_db.nodes:
-                self.nodes.append(node.name)
-
-            for msg in cantools_db.messages:
-                print(f'msg to translate -> {msg}')
