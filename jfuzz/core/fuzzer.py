@@ -73,5 +73,7 @@ class Fuzzer:
                     to_send = database.encode_message(data=signals, frame_id_or_name=msg.frame_id)
                     message = can.Message(arbitration_id=msg.frame_id, data=to_send)
                     self.bus.send(msg=message, timeout=5.0)
-            except :
+            except can.exceptions.CanOperationError:
+                pass
+            except OverflowError:
                 pass
