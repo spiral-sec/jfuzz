@@ -1,6 +1,8 @@
 # -*- coding: UTF-8 -*-
 import os
 import random
+import signal
+import sys
 
 import can
 import cantools
@@ -29,7 +31,8 @@ class Fuzzer:
             name=name,
             bustype=bustype,
             channel=channel,
-            bitrate=10000
+            bitrate=10000,
+            fd=True
         )
 
 
@@ -40,28 +43,14 @@ class Fuzzer:
         for s in signals:
             names.append(s.name)
 
-            print(f'name: {s.name}')
-            print(f's.choices: {s.choices}')
-            print(f's.minimum: {s.minimum}')
-            print(f's.maximum: {s.maximum}')
-            print(f's.scale: {s.scale}')
-            print(f's.unit: {s.unit}')
-            print(f's.initial: {s.initial}')
-
-
-            if s.choices:
-                value = random.randint(s.minimum, s.maximum)
-                values.append(s.choices[value])
+            if not s.minimum and not s.maximum:
+                values.append(1)
             elif not s.choices and s.unit == 'N.m':
-                value = random.randrange(s.minimum, s.maximum)
-                values.append(value)
-            elif not s.choices and s.unit == 'rpm':
-                value = random.randint(s.minimum, s.maximum)
+                value = random.uniform(s.minimum, s.maximum)
                 values.append(value)
             else:
-                values.append(s.scale)
-
-            print()
+                value = random.uniform(s.minimum, s.maximum)
+                values.append(value)
 
         return dict(zip(names, values))
 
@@ -74,12 +63,15 @@ class Fuzzer:
             result.append(database.messages[chosen])
         return result
 
-
     def run(self, database: cantools.database, bundle_size: int = 10):
         print('[+] Setting up fuzzing run...')
         while 1:
-            messages = self.select_n_messages(database, bundle_size)
-            for msg in messages:
-                to_send = database.encode_message(data=self.setup_signals(msg.signals), frame_id_or_name=msg.frame_id)
-                message = can.Message(arbitration_id=msg.frame_id, data=to_send)
-                self.bus.send(msg=message, timeout=5.0)
+            try:
+                messages = self.select_n_messages(database, bundle_size)
+                for msg in messages:
+                    signals = self.setup_signals(msg.signals)
+                    to_send = database.encode_message(data=signals, frame_id_or_name=msg.frame_id)
+                    message = can.Message(arbitration_id=msg.frame_id, data=to_send)
+                    self.bus.send(msg=message, timeout=5.0)
+            except :
+                pass
