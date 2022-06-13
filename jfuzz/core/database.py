@@ -19,7 +19,7 @@ class Database:
 
         self.collect_dbc_files(project_dir_path)
         for file in self.files:
-            self.database.add_dbc_file(file, encoding='cp1252')
+            self.database.add_dbc_file(file)
 
     def collect_dbc_files(self, dir_path) -> None:
         sep = '/' if os.environ.get('DEV', False) else '\\'
