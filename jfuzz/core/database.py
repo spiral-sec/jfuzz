@@ -22,7 +22,7 @@ class Database:
             self.database.add_dbc_file(file)
 
     def collect_dbc_files(self, dir_path) -> None:
-        sep = '/' if os.environ.get('DEV', False) else '\\'
+        sep = '/' if os.name == 'nt' else '\\'
 
         for root, _dirs, files in walk(dir_path):
             for file in files:

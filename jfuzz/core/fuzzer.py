@@ -1,10 +1,6 @@
 # -*- coding: UTF-8 -*-
 import os
 import random
-import signal
-import sys
-import time
-from pprint import pprint
 
 import bitstruct
 import can
@@ -24,7 +20,7 @@ class Fuzzer:
 
            (Make sure to register CANalyzer on channel 1 in the Vector Hardware Configuration tool)
         """
-        self.is_dev = os.environ.get('DEV', False)
+        self.is_dev = os.name == 'nt'
         bustype = 'socketcan' if self.is_dev else 'vector'
         channel = 'vcan0' if self.is_dev else 0
         name = 'jfuzz' if self.is_dev else 'CANalyzer'
@@ -83,7 +79,6 @@ class Fuzzer:
         message = can.Message(arbitration_id=msg.frame_id, data=to_send)
         self.bus.send(msg=message, timeout=5.0)
 
-        # self.logger.on_message_received(message)
         print(f'[+] {message}')
 
     def run(self, database: cantools.database.can.Database, bundle_size: int = 10):
