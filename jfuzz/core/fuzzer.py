@@ -20,7 +20,7 @@ class Fuzzer:
 
            (Make sure to register CANalyzer on channel 1 in the Vector Hardware Configuration tool)
         """
-        self.is_dev = os.name == 'nt'
+        self.is_dev = os.name != 'nt'
         bustype = 'socketcan' if self.is_dev else 'vector'
         channel = 'vcan0' if self.is_dev else 0
         name = 'jfuzz' if self.is_dev else 'CANalyzer'
