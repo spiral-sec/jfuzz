@@ -24,22 +24,23 @@ class Fuzzer:
 
            (Make sure to register CANalyzer on channel 1 in the Vector Hardware Configuration tool)
         """
-        development_mode_enabled = os.environ.get('DEV', False)
-        bustype = 'socketcan' if development_mode_enabled else 'vector'
-        channel = 'vcan0' if development_mode_enabled else 0
-        name = 'jfuzz' if development_mode_enabled else 'CANalyzer'
+        self.is_dev = os.environ.get('DEV', False)
+        bustype = 'socketcan' if self.is_dev else 'vector'
+        channel = 'vcan0' if self.is_dev else 0
+        name = 'jfuzz' if self.is_dev else 'CANalyzer'
 
-        print(f'[~] Building {bustype} bus // dev mode [{development_mode_enabled}]')
+        print(f'[~] Building {bustype} bus // dev mode [{self.is_dev}]')
 
-        self.logger = Logger('jfuzz.blf')
-
-        self.bus = can.ThreadSafeBus(
+        self.bus = can.interface.Bus(
             name=name,
             bustype=bustype,
             channel=channel,
+            bitrate=10000,
             fd=True,
-            receive_own_messages=True
         )
+
+        if not self.is_dev: ## SocketCAN does not play well with other file descriptors apparently
+            self.logger = Logger('jfuzz.blf')
 
     @staticmethod
     def setup_signals(signals: [cantools.database.Signal]) -> dict[str, any]:
@@ -70,26 +71,40 @@ class Fuzzer:
             result.append(database.messages[chosen])
         return result
 
+    def read(self):
+        if received := self.bus.recv():
+            if not self.is_dev:
+                self.logger.on_message_received(received)
+            print(f'[-] {received}')
+
+    def send(self, msg, database):
+        signals = self.setup_signals(msg.signals)
+        to_send = database.encode_message(data=signals, frame_id_or_name=msg.frame_id)
+        message = can.Message(arbitration_id=msg.frame_id, data=to_send)
+        self.bus.send(msg=message, timeout=5.0)
+
+        # self.logger.on_message_received(message)
+        print(f'[+] {message}')
+
     def run(self, database: cantools.database.can.Database, bundle_size: int = 10):
         print('[~] Setting up fuzzing run...')
+        self.bus.flush_tx_buffer()
         while 1:
             messages = self.select_n_messages(database, bundle_size)
             for msg in messages:
                 try:
-                    if received := self.bus.recv(timeout=0.05):
-                        self.logger.on_message_received(received)
-                        print(f'[-] {received}')
 
-                    signals = self.setup_signals(msg.signals)
-                    to_send = database.encode_message(data=signals, frame_id_or_name=msg.frame_id)
-                    message = can.Message(arbitration_id=msg.frame_id, data=to_send)
-                    self.bus.send(msg=message, timeout=0.05)
+                    if not self.is_dev:
+                        self.read()
 
-                    self.logger.on_message_received(received)
-                    print(f'[+] {message}')
+                    self.send(msg, database)
 
                 # May happen when encoding cantools messages
                 except OverflowError:
+                    pass
+
+                # Happens only sometimes with SocketCAN
+                except can.exceptions.CanOperationError:
                     pass
 
                 # Only happens on Vector sometimes
@@ -98,5 +113,6 @@ class Fuzzer:
 
                 # Must always happen if there is an error
                 except:
-                    self.logger.stop()
+                    if not self.is_dev:
+                        self.logger.stop()
                     self.bus.shutdown()
