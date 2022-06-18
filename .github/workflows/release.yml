@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "canon"
+      - "next"
 
 jobs:
   test:
