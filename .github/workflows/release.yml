@@ -1,6 +1,9 @@
-name: Build distribution
+name: Release package to PyPI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "canon"
 
 jobs:
   test:
