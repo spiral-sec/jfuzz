@@ -1,11 +1,13 @@
 # -*- coding: UTF-8 -*-
-from jfuzz.core.database import DBC
-from jfuzz.core.fuzzer import Fuzzer
+
+
+from jfuzz.fuzzer import Fuzzer
+from jfuzz.fuzzer.database import DBC
 
 
 def main() -> None:
     dbc = DBC('.')
-    Fuzzer().run(dbc.database, 10)
+    Fuzzer().run(dbc.database)
 
 
 
