@@ -1,15 +1,17 @@
 # -*- coding: UTF-8 -*-
 import os
 import random
+from typing import List, Union
 
 import bitstruct
 import can
-import cantools
 from can import Logger
-from cantools.database import Message
+from cantools.database.can.message import Message
+from cantools.database.can.signal import Signal
+from cantools.database.can.database import Database
 
-from jfuzz.core.database import Database
 
+Numeric = Union[int, float, complex, None]
 
 class Fuzzer:
     def __init__(self):
@@ -27,7 +29,7 @@ class Fuzzer:
 
         print(f'[~] Building {bustype} bus // dev mode [{self.is_dev}]')
 
-        self.bus = can.interface.Bus(
+        self.bus = can.ThreadSafeBus(
             name=name,
             bustype=bustype,
             channel=channel,
@@ -39,9 +41,9 @@ class Fuzzer:
             self.logger = Logger('jfuzz.blf')
 
     @staticmethod
-    def setup_signals(signals: [cantools.database.Signal]) -> dict[str, any]:
-        names: [str] = []
-        values: [any] = []
+    def setup_signals(signals: List[Signal]) -> dict[str, Numeric]:
+        names: List[str] = []
+        values: List[Numeric] = []
 
         for s in signals:
             names.append(s.name)
@@ -49,16 +51,16 @@ class Fuzzer:
             if not s.minimum and not s.maximum:
                 values.append(1)
             elif not s.choices and s.unit == 'N.m':
-                value = random.uniform(s.minimum, s.maximum)
+                value = random.uniform(s.minimum, s.maximum)    # type: ignore
                 values.append(value)
             else:
-                value = random.uniform(s.minimum, s.maximum)
+                value = random.uniform(s.minimum, s.maximum)    # type: ignore
                 values.append(value)
 
         return dict(zip(names, values))
 
     @staticmethod
-    def select_n_messages(database: Database, n: int = 10) -> [Message]:
+    def select_n_messages(database: Database, n: int = 10) -> List[Message]:
         nb_messages = len(database.messages)
         result = []
 
@@ -81,7 +83,7 @@ class Fuzzer:
 
         print(f'[+] {message}')
 
-    def run(self, database: cantools.database.can.Database, bundle_size: int = 10):
+    def run(self, database: Database, bundle_size: int = 10):
         print('[~] Setting up fuzzing run...')
         self.bus.flush_tx_buffer()
         while 1:

@@ -2,20 +2,21 @@
 
 import os
 from os import walk
+from typing import List
 
-import cantools
-from cantools.database import load_file
+from cantools.database.can.database import Database
+
 
 """
     This class implements the DBC parser from cantools, which sends back Messages that can be sent to the CAN bus
     with python-can
 """
 
-class Database:
+class DBC:
     def __init__(self, project_dir_path: str) -> None:
-        self.files: [str] = []
+        self.files: List[str] = []
         self.messages = []
-        self.database: cantools.database.Database = cantools.database.Database()
+        self.database: Database = Database()
 
         self.collect_dbc_files(project_dir_path)
         for file in self.files:
@@ -24,7 +25,7 @@ class Database:
     def collect_dbc_files(self, dir_path) -> None:
         sep = '/' if os.name != 'nt' else '\\'
 
-        for root, _dirs, files in walk(dir_path):
+        for root, _dirs, files in walk(dir_path): # type: ignore
             for file in files:
                 if file.endswith('.dbc'):
                     new_file = root + sep + file

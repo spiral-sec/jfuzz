@@ -1,12 +1,10 @@
 # -*- coding: UTF-8 -*-
-import can
-
-from jfuzz.core.database import Database
+from jfuzz.core.database import DBC
 from jfuzz.core.fuzzer import Fuzzer
 
 
 def main() -> None:
-    dbc = Database('.')
+    dbc = DBC('.')
     Fuzzer().run(dbc.database, 10)
 
 
